@@ -1,0 +1,56 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: helvetica;
+}
+
+header {
+    background-image: linear-gradient(rgba(0,0,0,0),rgb(85, 85, 85)), url(https://cdn.statically.io/img/wallpaperaccess.com/full/13672.jpg);
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    
+}
+
+ul {
+    float: right;
+    list-style-type: none;
+    padding: 30px;
+}
+
+
+ul li {
+    display: inline-block;
+}
+
+
+ul li a {
+    color: white;
+    font-size: x-large;
+    text-decoration: none ;
+    padding: 20px 25px;
+}
+
+u {
+    float: left;
+    text-decoration: none;
+    padding: 25px 100px;
+    font-size: xx-large;
+    color: white;
+}
+
+.tampilan-ngegas {
+    text-align: center;
+    color: white;
+    padding-top: 300px;
+}
+
+.tampilan-ngegas h1 {
+    font-size: 130px;
+    font-style: spacea;
+}
+
+.tampilan-ngegas p {
+    font-size: 30px;
+    font-family: 'Space Age', arial;    font-style: italic;
+}
