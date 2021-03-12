@@ -9,33 +9,62 @@
     background-color: white;
 }
 
-.menus {
-    right: -1200px;
+ul {
+    float: right;
     list-style-type: none;
     padding: 30px;
-    height: 40px;
-    background-color: white;
-    width: 100%;
-    position: relative;
 }
 
-.menus li {
+
+ul li {
     display: inline-block;
-    position: center center;
 }
 
-.menus li a {
+
+ul li a {
     color: black;
-    text-decoration: none; 
     font-size: xx-large;
-    padding: 25px;
+    text-decoration: none ;
+    padding: 20px 25px;
 }
 
 .logo {
-    right: 3000px;
-    bottom: 10px;
-    color: white;
+    float: left;
+    text-decoration: none;
+    padding: 25px 100px;
+    font-size: xx-large;
+    color: black;
     position: absolute;
+}
+
+.poto-biograpi {
+
+    background-image: url(img/fotobiograpi.jpg);
+    height: 500px;
+    width: 450px;
+    top: 200px;
+    right: 800px;
+    position: absolute;
+    background-position: center center;
+    background-size: cover;
+
+}
+
+.biograpi {
+
+    text-align: center;
+    top: 780px;
+    left: 50px;
+    position: absolute;
+    font-size: x-large;
+
+}
+
+.kotak-link {
+
+    top: 800px;
+    position: absolute;
+
 }
 
 .container-link {
@@ -47,10 +76,10 @@
     background-image: url(https://image.flaticon.com/icons/png/512/69/69366.png);
     background-size: cover;
     background-position: center;
-    height: 122%;
-    width: 49%;
+    height: 120%;
+    width: 46%;
     position: relative;
-    right: -700px;
+    right: -705px;
     top: 200px;
     
 }
@@ -71,11 +100,11 @@
     background-image: url(https://image.flaticon.com/icons/png/512/23/23681.png);
     background-size: cover;
     background-position: center;
-    height: 130%;
-    width: 16.5%;
+    height: 126%;
+    width: 50%;
     position: relative;
     right: -700px;
-    bottom: 75px;
+    top: 300px;
     
 }
 
@@ -84,6 +113,13 @@
     text-decoration: none;
     font-family: Helvetica;
 }
+
+.link-twt {
+    color: black;
+    text-decoration: none;
+    font-family: Helvetica;
+}
+
 .link-fb {
     right: 10px;
     position: absolute;
@@ -97,6 +133,7 @@
     font-size: x-large;
     top: 40px;
     position: absolute;
+    text-decoration: none;
 
 }
 
