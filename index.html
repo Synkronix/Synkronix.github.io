@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOBOSUBA - Agar.io Ultra-Jelly Edition</title>
+    <title>SOBOSUBA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,23 +11,25 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         html, body { width: 100%; height: 100%; background: #0c0c0e; overflow: hidden; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Chakra Petch', sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Chakra Petch', sans-serif; padding: 8px; }
 
         .game-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            height: 94vh;
-            aspect-ratio: 16 / 9;
-            max-width: 96vw;
+            width: 100%;
+            height: 100%;
+            max-width: 100vw;
+            max-height: 100vh;
             background: #111113;
             border-radius: 12px;
             box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            overflow: hidden;
         }
 
         .left-panel {
-            flex: 1;
+            flex: 0 0 clamp(30px, 8vw, 80px);
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -38,24 +40,24 @@
 
         .menu-btn {
             position: absolute;
-            left: 28px;
+            left: clamp(8px, 2vw, 28px);
             top: 50%;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             cursor: pointer;
             opacity: 0.35;
             transition: opacity 0.2s;
         }
         .menu-btn:hover { opacity: 0.8; }
-        .menu-bar { width: 18px; height: 3px; background: #666; border-radius: 2px; }
+        .menu-bar { width: 16px; height: 3px; background: #666; border-radius: 2px; }
 
         .sobosuba-title {
             writing-mode: vertical-rl;
             transform: rotate(180deg);
             font-family: 'Orbitron', sans-serif;
-            font-size: 5.5vh;
+            font-size: clamp(2.5vh, 4.5vw, 5.5vh);
             font-weight: 900;
             letter-spacing: 2px;
             color: #2b2b2e;
@@ -65,44 +67,48 @@
 
         .tank-wrapper {
             position: relative;
-            height: 90%;
-            aspect-ratio: 0.82;
+            height: 98%;
+            aspect-ratio: 0.72;
+            max-width: calc(100vw - 70px);
+            max-height: 98vh;
             background: #232326;
             border-radius: 14px 14px 28px 28px;
-            padding: 8px;
+            padding: 6px;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
+            margin: auto 0;
         }
 
         .screw {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background: #444;
             border-radius: 50%;
             box-shadow: inset 1px 1px 1px #222;
         }
-        .screw.tl { top: 10px; left: 10px; }
-        .screw.tr { top: 10px; right: 10px; }
-        .screw.bl { bottom: 12px; left: 12px; }
-        .screw.br { bottom: 12px; right: 12px; }
+        .screw.tl { top: 6px; left: 6px; }
+        .screw.tr { top: 6px; right: 6px; }
+        .screw.bl { bottom: 8px; left: 8px; }
+        .screw.br { bottom: 8px; right: 8px; }
 
         .grip-left, .grip-right {
             position: absolute;
-            width: 14px;
-            height: 100px;
+            width: 10px;
+            height: 70px;
             background: #323236;
-            border-radius: 10px;
+            border-radius: 8px;
             top: 40%;
             transform: translateY(-50%);
         }
-        .grip-left { left: -7px; }
-        .grip-right { right: -7px; }
+        .grip-left { left: -5px; }
+        .grip-right { right: -5px; }
 
         .canvas-container {
             flex: 1;
             width: 100%;
+            height: 100%;
             background: #050505;
             border-radius: 8px 8px 22px 22px;
             position: relative;
@@ -110,17 +116,17 @@
             clip-path: polygon(
                 0% 0%, 
                 100% 0%, 
-                100% calc(100% - 32px), 
-                calc(100% - 32px) 100%, 
-                32px 100%, 
-                0% calc(100% - 32px)
+                100% calc(100% - 24px), 
+                calc(100% - 24px) 100%, 
+                24px 100%, 
+                0% calc(100% - 24px)
             );
         }
 
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
         .right-panel {
-            flex: 1;
+            flex: 0 0 clamp(35px, 10vw, 100px);
             height: 100%;
             display: flex;
             align-items: center;
@@ -132,10 +138,10 @@
             writing-mode: vertical-rl;
             transform: rotate(180deg);
             font-family: 'Orbitron', sans-serif;
-            font-size: 8.5vh;
+            font-size: clamp(3.5vh, 6.5vw, 8.5vh);
             font-weight: 900;
             color: #242427;
-            letter-spacing: 4px;
+            letter-spacing: 2px;
         }
 
         .game-over {
@@ -208,14 +214,7 @@
         const container = document.getElementById('canvasContainer');
 
         let width, height;
-        function resize() {
-            width = container.clientWidth;
-            height = container.clientHeight;
-            canvas.width = width;
-            canvas.height = height;
-        }
-        resize();
-        window.addEventListener('resize', resize);
+        let leftWall, rightWall, bottomWall, leftCorner, rightCorner;
 
         const { Engine, World, Bodies, Body, Events } = Matter;
         const engine = Engine.create({ enableSleeping: false });
@@ -225,7 +224,6 @@
         let gameOver = false;
         let blobs = [];
         let floatTexts = [];
-        let particles = [];
 
         const COLORS = {
             1: '#eb2d30', 2: '#f6d928', 4: '#7af230', 8: '#3bf1d2',
@@ -234,34 +232,50 @@
         };
 
         function getRadius(val) {
-            const base = width * 0.085;
+            const base = width * 0.07;
             const mult = Math.log2(val);
-            return base + mult * (width * 0.018);
+            return base + mult * (width * 0.015);
         }
 
-        const wallOpts = { isStatic: true, friction: 0.3, restitution: 0.2 };
+        const wallOpts = { isStatic: true, friction: 0.5, restitution: 0.1 };
         const wallThick = 60;
 
-        const leftWall = Bodies.rectangle(-wallThick/2, height/2, wallThick, height * 2, wallOpts);
-        const rightWall = Bodies.rectangle(width + wallThick/2, height/2, wallThick, height * 2, wallOpts);
-        const bottomWall = Bodies.rectangle(width/2, height + wallThick/2, width * 2, wallThick, wallOpts);
+        function buildPhysicsWalls() {
+            if (leftWall) World.remove(engine.world, [leftWall, rightWall, bottomWall, leftCorner, rightCorner]);
 
-        const cornerSize = 38;
-        const leftCorner = Bodies.fromVertices(cornerSize/2, height - cornerSize/2, [
-            { x: 0, y: height },
-            { x: cornerSize * 1.2, y: height },
-            { x: 0, y: height - cornerSize * 1.2 }
-        ], wallOpts);
+            leftWall = Bodies.rectangle(-wallThick/2, height/2, wallThick, height * 2, wallOpts);
+            rightWall = Bodies.rectangle(width + wallThick/2, height/2, wallThick, height * 2, wallOpts);
+            bottomWall = Bodies.rectangle(width/2, height + wallThick/2, width * 2, wallThick, wallOpts);
 
-        const rightCorner = Bodies.fromVertices(width - cornerSize/2, height - cornerSize/2, [
-            { x: width, y: height },
-            { x: width, y: height - cornerSize * 1.2 },
-            { x: width - cornerSize * 1.2, y: height }
-        ], wallOpts);
+            const cornerSize = Math.min(38, width * 0.1);
+            leftCorner = Bodies.fromVertices(cornerSize/2, height - cornerSize/2, [
+                { x: 0, y: height },
+                { x: cornerSize * 1.2, y: height },
+                { x: 0, y: height - cornerSize * 1.2 }
+            ], wallOpts);
 
-        World.add(engine.world, [leftWall, rightWall, bottomWall, leftCorner, rightCorner]);
+            rightCorner = Bodies.fromVertices(width - cornerSize/2, height - cornerSize/2, [
+                { x: width, y: height },
+                { x: width, y: height - cornerSize * 1.2 },
+                { x: width - cornerSize * 1.2, y: height }
+            ], wallOpts);
 
-        let queue = [1, 2, 4, 8, 16];
+            World.add(engine.world, [leftWall, rightWall, bottomWall, leftCorner, rightCorner]);
+        }
+
+        function resize() {
+            const rect = container.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            buildPhysicsWalls();
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        let queue = [32, 2, 1, 4, 8];
         function generateNextTile() {
             const rand = Math.random();
             if (rand < 0.45) return 1;
@@ -271,22 +285,20 @@
             return 16;
         }
 
-        // --- AGAR.IO STYLE HARMONIC WAVE VERTEX SYSTEM ---
         function createDeformableBlob(x, y, value) {
             const radius = getRadius(value);
             const body = Bodies.circle(x, y, radius, {
-                restitution: 0.6,
-                friction: 0.2,
-                frictionAir: 0.002,
-                density: 0.0012
+                restitution: 0.15,
+                friction: 0.5,
+                frictionAir: 0.005,
+                density: 0.0015
             });
 
             body.value = value;
             body.radius = radius;
             body.mergeCooldown = 0;
 
-            // 32 High-density perimeter points for ultra-liquid fidelity
-            const pointCount = 32;
+            const pointCount = 28;
             body.nodes = [];
             for (let i = 0; i < pointCount; i++) {
                 body.nodes.push({
@@ -296,77 +308,19 @@
                 });
             }
 
-            // Per-blob unique random wave phase offset for distinct idle wobble
-            body.phase = Math.random() * Math.PI * 2;
-            body.stretchX = 1;
-            body.stretchY = 1;
-
+            body.popScale = 1.2;
             blobs.push(body);
             World.add(engine.world, body);
             return body;
         }
 
-        function spawnSplatter(x, y, color, count = 16) {
-            for (let i = 0; i < count; i++) {
-                const ang = Math.random() * Math.PI * 2;
-                const spd = Math.random() * 9 + 2;
-                particles.push({
-                    x, y,
-                    vx: Math.cos(ang) * spd,
-                    vy: Math.sin(ang) * spd - 2,
-                    r: Math.random() * 5 + 2,
-                    color,
-                    life: 1.0
-                });
-            }
-        }
-
-        // Direct collision deformation physics
+        // Inter-blob soft contacts and merging physics
         Events.on(engine, 'collisionStart', (evt) => {
-            evt.pairs.forEach(({ bodyA, bodyB, collision }) => {
+            evt.pairs.forEach(({ bodyA, bodyB }) => {
                 const bA = bodyA.value ? bodyA : null;
                 const bB = bodyB.value ? bodyB : null;
 
-                const normal = collision.normal;
-                const impactVel = Math.hypot(
-                    (bodyA.velocity?.x || 0) - (bodyB.velocity?.x || 0),
-                    (bodyA.velocity?.y || 0) - (bodyB.velocity?.y || 0)
-                );
-
-                if (impactVel > 1.2) {
-                    [bA, bB].forEach(b => {
-                        if (!b || !b.nodes) return;
-                        
-                        const hitAngle = Math.atan2(normal.y, normal.x) - b.angle;
-                        const impactForce = Math.min(impactVel * 4.5, 30);
-
-                        // Deform vertices using proximity falloff
-                        b.nodes.forEach(node => {
-                            let diff = node.angle - hitAngle;
-                            while (diff < -Math.PI) diff += Math.PI * 2;
-                            while (diff > Math.PI) diff -= Math.PI * 2;
-
-                            const proximity = Math.cos(diff);
-                            if (proximity > 0) {
-                                node.velocity -= proximity * impactForce;
-                            } else {
-                                // Volume expansion on rear side
-                                node.velocity += Math.abs(proximity) * impactForce * 0.5;
-                            }
-                        });
-
-                        const angleNormal = Math.abs(Math.atan2(normal.y, normal.x));
-                        if (angleNormal > Math.PI / 4 && angleNormal < (3 * Math.PI) / 4) {
-                            b.stretchY = Math.max(0.4, 1 - impactVel * 0.06);
-                            b.stretchX = Math.min(1.6, 1 + impactVel * 0.06);
-                        } else {
-                            b.stretchX = Math.max(0.4, 1 - impactVel * 0.06);
-                            b.stretchY = Math.min(1.6, 1 + impactVel * 0.06);
-                        }
-                    });
-                }
-
-                // Merge Handling
+                // Gentle non-explody merge
                 if (bA && bB && bA.value === bB.value && bA.mergeCooldown === 0 && bB.mergeCooldown === 0) {
                     const nextVal = bA.value * 2;
                     const midX = (bA.position.x + bB.position.x) / 2;
@@ -378,14 +332,8 @@
                     bA.value = nextVal;
                     bA.radius = getRadius(nextVal);
                     bA.mergeCooldown = 12;
+                    bA.popScale = 1.35; // Gentle scale bounce
                     Body.setPosition(bA, { x: midX, y: midY });
-
-                    // Violent radial wave explosion across all 32 perimeter nodes
-                    bA.nodes.forEach((node, i) => {
-                        node.velocity = Math.sin(i * 0.5) * 35;
-                    });
-
-                    spawnSplatter(midX, midY, COLORS[nextVal] || '#fff', 20);
 
                     score += nextVal;
                     document.getElementById('scoreDisplay').textContent = score;
@@ -400,7 +348,7 @@
             });
         });
 
-        // Touch & Drag Controls
+        // Direct Aiming Controls (Drag Down = Arrow Points Down = Shoot Down)
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
         let dragCurrent = { x: 0, y: 0 };
@@ -428,26 +376,27 @@
             if (!isDragging || gameOver) return;
             isDragging = false;
 
-            const dx = dragStart.x - dragCurrent.x;
-            const dy = dragStart.y - dragCurrent.y;
+            // Direct vector: Pulling down launches down
+            const dx = dragCurrent.x - dragStart.x;
+            const dy = dragCurrent.y - dragStart.y;
             const dist = Math.hypot(dx, dy);
 
             const activeVal = queue.shift();
             queue.push(generateNextTile());
 
-            const spawnX = width / 2;
-            const spawnY = height * 0.12;
+            const spawnX = width * 0.42;
+            const spawnY = height * 0.08;
             const blob = createDeformableBlob(spawnX, spawnY, activeVal);
 
-            if (dist > 15) {
-                const angle = Math.atan2(dy, dx);
-                const power = Math.min(dist * 0.14, 22);
+            if (dist > 10) {
+                const angle = Math.atan2(Math.max(10, dy), dx);
+                const power = Math.min(dist * 0.12, 20);
                 Body.setVelocity(blob, {
                     x: Math.cos(angle) * power,
                     y: Math.sin(angle) * power
                 });
             } else {
-                Body.setVelocity(blob, { x: 0, y: 2.5 });
+                Body.setVelocity(blob, { x: 0, y: 4 });
             }
         };
 
@@ -479,7 +428,6 @@
         function restartGame() {
             blobs.forEach(b => World.remove(engine.world, b));
             blobs = [];
-            particles = [];
             score = 0;
             gameOver = false;
             overflowTime = 0;
@@ -487,69 +435,138 @@
             document.getElementById('gameOverModal').classList.remove('show');
         }
 
+        // Realistic Squishy Mesh Deformation Solver
+        function applySquishyInteractions() {
+            for (let i = 0; i < blobs.length; i++) {
+                const bA = blobs[i];
+                
+                for (let j = i + 1; j < blobs.length; j++) {
+                    const bB = blobs[j];
+                    const dx = bB.position.x - bA.position.x;
+                    const dy = bB.position.y - bA.position.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = bA.radius + bB.radius;
+
+                    if (dist < minDist && dist > 0.001) {
+                        const overlap = minDist - dist;
+                        const contactAngleA = Math.atan2(dy, dx) - bA.angle;
+                        const contactAngleB = Math.atan2(-dy, -dx) - bB.angle;
+
+                        // Flatten vertices at contact points into tight squishy gaps
+                        bA.nodes.forEach(node => {
+                            let diff = node.angle - contactAngleA;
+                            while (diff < -Math.PI) diff += Math.PI * 2;
+                            while (diff > Math.PI) diff -= Math.PI * 2;
+                            if (Math.abs(diff) < Math.PI / 3) {
+                                node.offset -= Math.cos(diff) * overlap * 0.18;
+                            }
+                        });
+
+                        bB.nodes.forEach(node => {
+                            let diff = node.angle - contactAngleB;
+                            while (diff < -Math.PI) diff += Math.PI * 2;
+                            while (diff > Math.PI) diff -= Math.PI * 2;
+                            if (Math.abs(diff) < Math.PI / 3) {
+                                node.offset -= Math.cos(diff) * overlap * 0.18;
+                            }
+                        });
+                    }
+                }
+
+                // Wall compression
+                if (bA.position.x - bA.radius < 12) {
+                    const comp = 12 - (bA.position.x - bA.radius);
+                    bA.nodes.forEach(node => {
+                        const globalAngle = node.angle + bA.angle;
+                        if (Math.abs(Math.cos(globalAngle) + 1) < 0.6) {
+                            node.offset -= comp * 0.2;
+                        }
+                    });
+                }
+                if (bA.position.x + bA.radius > width - 12) {
+                    const comp = (bA.position.x + bA.radius) - (width - 12);
+                    bA.nodes.forEach(node => {
+                        const globalAngle = node.angle + bA.angle;
+                        if (Math.abs(Math.cos(globalAngle) - 1) < 0.6) {
+                            node.offset -= comp * 0.2;
+                        }
+                    });
+                }
+                if (bA.position.y + bA.radius > height - 12) {
+                    const comp = (bA.position.y + bA.radius) - (height - 12);
+                    bA.nodes.forEach(node => {
+                        const globalAngle = node.angle + bA.angle;
+                        if (Math.abs(Math.sin(globalAngle) - 1) < 0.6) {
+                            node.offset -= comp * 0.2;
+                        }
+                    });
+                }
+            }
+        }
+
         function draw() {
             ctx.clearRect(0, 0, width, height);
 
-            // 1. Top Dispenser Queue
-            const queueY = height * 0.08;
-            const activeX = width * 0.42;
-            const spacing = width * 0.12;
+            // 1. Top Dispenser Queue matching reference layout
+            const queueY = height * 0.09;
+            const activeX = width * 0.38;
+            const spacing = width * 0.13;
 
             const activeVal = queue[0];
             const activeRad = getRadius(activeVal);
             
             ctx.fillStyle = COLORS[activeVal] || '#fff';
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = Math.max(2, width * 0.008);
 
             ctx.beginPath();
-            ctx.roundRect(activeX - activeRad - 10, queueY - activeRad - 6, activeRad * 2 + 20, activeRad * 2 + 12, 30);
+            ctx.roundRect(activeX - activeRad - 8, queueY - activeRad - 4, activeRad * 2 + 16, activeRad * 2 + 8, activeRad + 4);
             ctx.stroke();
             ctx.fill();
 
             ctx.fillStyle = '#000';
-            ctx.font = `900 ${activeRad * 0.9}px 'Chakra Petch', sans-serif`;
+            ctx.font = `900 ${activeRad * 0.85}px 'Chakra Petch', sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(activeVal, activeX, queueY);
 
             for (let i = 1; i <= 3; i++) {
                 const val = queue[i];
-                const qRad = getRadius(val) * 0.7;
-                const qX = activeX + activeRad + 20 + (i - 1) * (spacing);
+                const qRad = getRadius(val) * 0.65;
+                const qX = activeX + activeRad + 16 + (i - 1) * spacing;
                 
                 ctx.fillStyle = COLORS[val] || '#fff';
                 ctx.beginPath();
-                ctx.roundRect(qX - qRad, queueY - qRad, qRad * 2, qRad * 2, 10);
+                ctx.roundRect(qX - qRad, queueY - qRad, qRad * 2, qRad * 2, Math.max(4, qRad * 0.35));
                 ctx.fill();
 
                 ctx.fillStyle = '#000';
-                ctx.font = `900 ${qRad * 0.9}px 'Chakra Petch', sans-serif`;
+                ctx.font = `900 ${qRad * 0.85}px 'Chakra Petch', sans-serif`;
                 ctx.fillText(val, qX, queueY);
             }
 
-            // 2. Trajectory Aim Arrow
+            // 2. Direct Aim Arrow (Points Down when pulling down)
             if (isDragging) {
-                const dx = dragStart.x - dragCurrent.x;
-                const dy = dragStart.y - dragCurrent.y;
+                const dx = dragCurrent.x - dragStart.x;
+                const dy = Math.max(10, dragCurrent.y - dragStart.y);
                 const dist = Math.hypot(dx, dy);
 
                 if (dist > 10) {
                     const angle = Math.atan2(dy, dx);
-                    const arrowLen = Math.min(dist * 0.8, 90);
-                    const startX = width / 2;
-                    const startY = height * 0.15;
+                    const arrowLen = Math.min(dist * 0.85, 120);
+                    const startX = activeX;
+                    const startY = queueY + activeRad + 10;
                     const endX = startX + Math.cos(angle) * arrowLen;
                     const endY = startY + Math.sin(angle) * arrowLen;
 
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 4;
+                    ctx.lineWidth = 4.5;
                     ctx.beginPath();
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(endX, endY);
                     ctx.stroke();
 
-                    const headLen = 12;
+                    const headLen = 14;
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
                     ctx.moveTo(endX, endY);
@@ -560,68 +577,40 @@
                 }
             }
 
-            // 3. Splatter Particles
-            particles = particles.filter(p => p.life > 0);
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.22;
-                p.life -= 0.03;
+            // 3. Solve Squishy Jelly Compression
+            applySquishyInteractions();
 
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = Math.max(0, p.life);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1.0;
-            });
-
-            // 4. AGAR.IO ULTRA-JELLY RENDERING PIPELINE
-            const now = Date.now() * 0.003;
-
+            // 4. Render Squishy Blobs
             blobs.forEach(b => {
                 if (b.mergeCooldown > 0) b.mergeCooldown--;
+                if (b.popScale > 1.0) b.popScale += (1.0 - b.popScale) * 0.12;
 
-                const r = b.radius;
-                const speed = Math.hypot(b.velocity.x, b.velocity.y);
-
-                // Smoothly restore global transform squashing
-                b.stretchX += (1 - b.stretchX) * 0.08;
-                b.stretchY += (1 - b.stretchY) * 0.08;
-
+                const r = b.radius * b.popScale;
                 ctx.save();
                 ctx.translate(b.position.x, b.position.y);
                 ctx.rotate(b.angle);
-                ctx.scale(b.stretchX, b.stretchY);
 
                 const nodeCount = b.nodes.length;
                 const points = [];
 
-                // Calculate multi-frequency sine wave overlay (Agar.io signature liquid wobble)
                 for (let i = 0; i < nodeCount; i++) {
                     const node = b.nodes[i];
                     
-                    // Spring physics for collision responses
-                    const spring = -node.offset * 0.08;
-                    const damping = -node.velocity * 0.09;
+                    // Soft spring recovery
+                    const spring = -node.offset * 0.06;
+                    const damping = -node.velocity * 0.08;
                     node.velocity += spring + damping;
                     node.offset += node.velocity;
+                    node.offset = Math.max(-r * 0.5, Math.min(r * 0.35, node.offset));
 
-                    // Superimposed sinusoidal waves for fluid perimeter motion
-                    const wave1 = Math.sin(now * 2 + node.angle * 3 + b.phase) * (r * 0.045);
-                    const wave2 = Math.cos(now * 3.5 - node.angle * 2) * (r * 0.025);
-                    const motionWobble = Math.sin(now * 5 + node.angle * 4) * Math.min(speed * 0.6, r * 0.12);
-
-                    const totalOffset = node.offset + wave1 + wave2 + motionWobble;
-                    const curR = Math.max(r * 0.5, r + totalOffset);
-
+                    const curR = r + node.offset;
                     points.push({
                         x: Math.cos(node.angle) * curR,
                         y: Math.sin(node.angle) * curR
                     });
                 }
 
-                // Smooth Catmull-Rom style Spline curve for liquid-smooth cell contours
+                // Smooth organic hull
                 ctx.beginPath();
                 const lastPt = points[nodeCount - 1];
                 const firstPt = points[0];
@@ -635,26 +624,18 @@
                 }
                 ctx.closePath();
 
-                // Base Fill Color
+                // Fill color
                 ctx.fillStyle = COLORS[b.value] || '#ffffff';
                 ctx.fill();
 
-                // Distinct Agar.io dark outer membrane contour
-                ctx.strokeStyle = 'rgba(10, 10, 10, 0.85)';
-                ctx.lineWidth = Math.max(3, r * 0.07);
+                // Dark outline
+                ctx.strokeStyle = '#111111';
+                ctx.lineWidth = 3.5;
                 ctx.stroke();
-
-                // Soft inner cell shine depth gradient
-                const grad = ctx.createRadialGradient(0, -r * 0.2, r * 0.1, 0, 0, r);
-                grad.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
-                grad.addColorStop(0.6, 'rgba(255, 255, 255, 0.05)');
-                grad.addColorStop(1, 'rgba(0, 0, 0, 0.15)');
-                ctx.fillStyle = grad;
-                ctx.fill();
 
                 // Number Label
                 ctx.fillStyle = '#000000';
-                ctx.font = `900 ${r * 0.75}px 'Chakra Petch', sans-serif`;
+                ctx.font = `900 ${r * 0.7}px 'Chakra Petch', sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(b.value, 0, 0);
