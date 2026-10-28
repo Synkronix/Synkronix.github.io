@@ -196,6 +196,7 @@
         let score = 0;
         let gameOver = false;
         let blobs = [];
+        let dropX = width / 2;
 
         const COLORS = {
             1: '#eb2d30', 2: '#f6d928', 4: '#7af230', 8: '#3bf1d2',
@@ -218,7 +219,6 @@
 
         World.add(engine.world, [leftWall, rightWall, bottomWall]);
 
-        // Spring-Mass Soft Body Mesh Structure
         function createSpringJellyBlob(x, y, value) {
             const radius = getRadius(value);
             const numNodes = 14;
@@ -245,7 +245,6 @@
                 node.value = value;
                 nodes.push(node);
 
-                // Radial Springs to Center Core
                 constraints.push(Constraint.create({
                     bodyA: center,
                     bodyB: node,
@@ -255,7 +254,6 @@
                 }));
             }
 
-            // Outer Perimeter Ring Springs
             for (let i = 0; i < numNodes; i++) {
                 const nextNode = nodes[(i + 1) % numNodes];
                 constraints.push(Constraint.create({
@@ -275,7 +273,6 @@
 
         let queue = [1, 2, 4, 8, 16];
 
-        // Direct Aim Controls (Pull Down -> Shoot Down)
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
         let dragCurrent = { x: 0, y: 0 };
@@ -291,10 +288,13 @@
             isDragging = true;
             dragStart = getTouchPos(e);
             dragCurrent = { ...dragStart };
+            dropX = Math.max(50, Math.min(width - 50, dragStart.x));
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (isDragging) dragCurrent = getTouchPos(e);
+            const pos = getTouchPos(e);
+            dropX = Math.max(50, Math.min(width - 50, pos.x));
+            if (isDragging) dragCurrent = pos;
         });
 
         window.addEventListener('mouseup', () => {
@@ -308,7 +308,7 @@
             const val = queue.shift();
             queue.push(1);
 
-            const blob = createSpringJellyBlob(width / 2, height * 0.12, val);
+            const blob = createSpringJellyBlob(dropX, height * 0.12, val);
             if (dist > 10) {
                 const angle = Math.atan2(dy, dx);
                 const speed = Math.min(dist * 0.12, 18);
@@ -319,8 +319,77 @@
             }
         });
 
+        // Collision handling for merging blobs with the same value
+        Events.on(engine, 'collisionStart', (event) => {
+            const pairs = event.pairs;
+            pairs.forEach(pair => {
+                const bodyA = pair.bodyA;
+                const bodyB = pair.bodyB;
+
+                if (bodyA.isCenter && bodyB.isCenter && bodyA.value === bodyB.value) {
+                    const blobA = blobs.find(b => b.center === bodyA);
+                    const blobB = blobs.find(b => b.center === bodyB);
+
+                    if (blobA && blobB && !blobA.merged && !blobB.merged) {
+                        blobA.merged = true;
+                        blobB.merged = true;
+
+                        const newVal = blobA.value * 2;
+                        score += newVal;
+                        document.getElementById('scoreDisplay').innerText = score;
+
+                        const midX = (bodyA.position.x + bodyB.position.x) / 2;
+                        const midY = (bodyA.position.y + bodyB.position.y) / 2;
+
+                        // Remove old blobs from world and array
+                        [blobA, blobB].forEach(b => {
+                            World.remove(engine.world, b.center);
+                            b.nodes.forEach(n => World.remove(engine.world, n));
+                            b.constraints.forEach(c => World.remove(engine.world, c));
+                        });
+                        blobs = blobs.filter(b => b !== blobA && b !== blobB);
+
+                        // Spawn upgraded blob
+                        createSpringJellyBlob(midX, midY, newVal);
+                    }
+                }
+            });
+        });
+
+        function restartGame() {
+            score = 0;
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('gameOverModal').classList.remove('show');
+            blobs.forEach(b => {
+                World.remove(engine.world, b.center);
+                b.nodes.forEach(n => World.remove(engine.world, n));
+                b.constraints.forEach(c => World.remove(engine.world, c));
+            });
+            blobs = [];
+            queue = [1, 2, 4, 8, 16];
+        }
+
         function draw() {
             ctx.clearRect(0, 0, width, height);
+
+            // Draw Preview Ball at Top
+            if (queue.length > 0) {
+                const previewVal = queue[0];
+                const previewRadius = getRadius(previewVal) * 0.6;
+                ctx.beginPath();
+                ctx.arc(dropX, height * 0.08, previewRadius, 0, Math.PI * 2);
+                ctx.fillStyle = COLORS[previewVal] || '#fff';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+
+                ctx.fillStyle = '#000';
+                ctx.font = `900 ${previewRadius}px 'Chakra Petch', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(previewVal, dropX, height * 0.08);
+            }
 
             // Render Springs and Soft Body Outlines
             blobs.forEach(b => {
