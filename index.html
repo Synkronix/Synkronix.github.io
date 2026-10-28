@@ -2,34 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOBOSUBA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SOBOSUBA - Spring-Mass Jelly Physics</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
         html, body { width: 100%; height: 100%; background: #0c0c0e; overflow: hidden; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Chakra Petch', sans-serif; padding: 8px; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Chakra Petch', sans-serif; }
 
         .game-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 100vw;
-            max-height: 100vh;
+            width: clamp(280px, 92vw, 980px);
+            height: clamp(480px, 92vh, 860px);
+            aspect-ratio: 16 / 9;
             background: #111113;
             border-radius: 12px;
             box-shadow: 0 0 40px rgba(0,0,0,0.8);
-            overflow: hidden;
+            padding: 10px;
         }
 
         .left-panel {
-            flex: 0 0 clamp(30px, 8vw, 80px);
+            width: 15%;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -38,26 +37,11 @@
             position: relative;
         }
 
-        .menu-btn {
-            position: absolute;
-            left: clamp(8px, 2vw, 28px);
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            cursor: pointer;
-            opacity: 0.35;
-            transition: opacity 0.2s;
-        }
-        .menu-btn:hover { opacity: 0.8; }
-        .menu-bar { width: 16px; height: 3px; background: #666; border-radius: 2px; }
-
         .sobosuba-title {
             writing-mode: vertical-rl;
             transform: rotate(180deg);
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2.5vh, 4.5vw, 5.5vh);
+            font-size: clamp(2vh, 4.5vh, 40px);
             font-weight: 900;
             letter-spacing: 2px;
             color: #2b2b2e;
@@ -67,48 +51,20 @@
 
         .tank-wrapper {
             position: relative;
-            height: 98%;
-            aspect-ratio: 0.72;
-            max-width: calc(100vw - 70px);
-            max-height: 98vh;
+            height: 100%;
+            aspect-ratio: 0.82;
             background: #232326;
             border-radius: 14px 14px 28px 28px;
-            padding: 6px;
+            padding: 8px;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
-            margin: auto 0;
+            flex-shrink: 0;
         }
-
-        .screw {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #444;
-            border-radius: 50%;
-            box-shadow: inset 1px 1px 1px #222;
-        }
-        .screw.tl { top: 6px; left: 6px; }
-        .screw.tr { top: 6px; right: 6px; }
-        .screw.bl { bottom: 8px; left: 8px; }
-        .screw.br { bottom: 8px; right: 8px; }
-
-        .grip-left, .grip-right {
-            position: absolute;
-            width: 10px;
-            height: 70px;
-            background: #323236;
-            border-radius: 8px;
-            top: 40%;
-            transform: translateY(-50%);
-        }
-        .grip-left { left: -5px; }
-        .grip-right { right: -5px; }
 
         .canvas-container {
             flex: 1;
             width: 100%;
-            height: 100%;
             background: #050505;
             border-radius: 8px 8px 22px 22px;
             position: relative;
@@ -116,17 +72,17 @@
             clip-path: polygon(
                 0% 0%, 
                 100% 0%, 
-                100% calc(100% - 24px), 
-                calc(100% - 24px) 100%, 
-                24px 100%, 
-                0% calc(100% - 24px)
+                100% calc(100% - 32px), 
+                calc(100% - 32px) 100%, 
+                32px 100%, 
+                0% calc(100% - 32px)
             );
         }
 
-        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        canvas { display: block; width: 100%; height: 100%; }
 
         .right-panel {
-            flex: 0 0 clamp(35px, 10vw, 100px);
+            width: 15%;
             height: 100%;
             display: flex;
             align-items: center;
@@ -138,10 +94,10 @@
             writing-mode: vertical-rl;
             transform: rotate(180deg);
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(3.5vh, 6.5vw, 8.5vh);
+            font-size: clamp(3vh, 7vh, 60px);
             font-weight: 900;
             color: #242427;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
         }
 
         .game-over {
@@ -168,31 +124,40 @@
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s;
         }
-        .btn-restart:hover { background: #555; }
+
+        @media (max-aspect-ratio: 1/1) {
+            .game-wrapper {
+                flex-direction: column;
+                aspect-ratio: auto;
+                width: 100vw;
+                height: 100vh;
+                padding: 4px;
+            }
+            .left-panel, .right-panel {
+                width: 100%;
+                height: 35px;
+            }
+            .sobosuba-title, .score-display {
+                writing-mode: horizontal-tb;
+                transform: none;
+                font-size: 18px;
+            }
+            .tank-wrapper {
+                width: 100%;
+                height: calc(100vh - 80px);
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="game-wrapper">
         <div class="left-panel">
-            <div class="menu-btn">
-                <div class="menu-bar"></div>
-                <div class="menu-bar"></div>
-                <div class="menu-bar"></div>
-            </div>
             <div class="sobosuba-title">sobosuba</div>
         </div>
 
         <div class="tank-wrapper">
-            <div class="screw tl"></div>
-            <div class="screw tr"></div>
-            <div class="screw bl"></div>
-            <div class="screw br"></div>
-            <div class="grip-left"></div>
-            <div class="grip-right"></div>
-
             <div class="canvas-container" id="canvasContainer">
                 <canvas id="gameCanvas"></canvas>
                 <div class="game-over" id="gameOverModal">
@@ -214,16 +179,23 @@
         const container = document.getElementById('canvasContainer');
 
         let width, height;
-        let leftWall, rightWall, bottomWall, leftCorner, rightCorner;
+        function resize() {
+            const rect = container.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        resize();
+        window.addEventListener('resize', resize);
 
-        const { Engine, World, Bodies, Body, Events } = Matter;
+        const { Engine, World, Bodies, Body, Constraint, Events } = Matter;
         const engine = Engine.create({ enableSleeping: false });
-        engine.world.gravity.y = 1.35;
+        engine.world.gravity.y = 1.3;
 
         let score = 0;
         let gameOver = false;
         let blobs = [];
-        let floatTexts = [];
 
         const COLORS = {
             1: '#eb2d30', 2: '#f6d928', 4: '#7af230', 8: '#3bf1d2',
@@ -232,123 +204,78 @@
         };
 
         function getRadius(val) {
-            const base = width * 0.07;
+            const base = width * 0.085 * 1.15;
             const mult = Math.log2(val);
-            return base + mult * (width * 0.015);
+            return base + mult * (width * 0.018 * 1.15);
         }
 
-        const wallOpts = { isStatic: true, friction: 0.5, restitution: 0.1 };
+        const wallOpts = { isStatic: true, friction: 0.3, restitution: 0.1 };
         const wallThick = 60;
 
-        function buildPhysicsWalls() {
-            if (leftWall) World.remove(engine.world, [leftWall, rightWall, bottomWall, leftCorner, rightCorner]);
+        const leftWall = Bodies.rectangle(-wallThick/2, height/2, wallThick, height * 2, wallOpts);
+        const rightWall = Bodies.rectangle(width + wallThick/2, height/2, wallThick, height * 2, wallOpts);
+        const bottomWall = Bodies.rectangle(width/2, height + wallThick/2, width * 2, wallThick, wallOpts);
 
-            leftWall = Bodies.rectangle(-wallThick/2, height/2, wallThick, height * 2, wallOpts);
-            rightWall = Bodies.rectangle(width + wallThick/2, height/2, wallThick, height * 2, wallOpts);
-            bottomWall = Bodies.rectangle(width/2, height + wallThick/2, width * 2, wallThick, wallOpts);
+        World.add(engine.world, [leftWall, rightWall, bottomWall]);
 
-            const cornerSize = Math.min(38, width * 0.1);
-            leftCorner = Bodies.fromVertices(cornerSize/2, height - cornerSize/2, [
-                { x: 0, y: height },
-                { x: cornerSize * 1.2, y: height },
-                { x: 0, y: height - cornerSize * 1.2 }
-            ], wallOpts);
-
-            rightCorner = Bodies.fromVertices(width - cornerSize/2, height - cornerSize/2, [
-                { x: width, y: height },
-                { x: width, y: height - cornerSize * 1.2 },
-                { x: width - cornerSize * 1.2, y: height }
-            ], wallOpts);
-
-            World.add(engine.world, [leftWall, rightWall, bottomWall, leftCorner, rightCorner]);
-        }
-
-        function resize() {
-            const rect = container.getBoundingClientRect();
-            width = rect.width;
-            height = rect.height;
-            canvas.width = width * window.devicePixelRatio;
-            canvas.height = height * window.devicePixelRatio;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-            buildPhysicsWalls();
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        let queue = [32, 2, 1, 4, 8];
-        function generateNextTile() {
-            const rand = Math.random();
-            if (rand < 0.45) return 1;
-            if (rand < 0.70) return 2;
-            if (rand < 0.88) return 4;
-            if (rand < 0.96) return 8;
-            return 16;
-        }
-
-        function createDeformableBlob(x, y, value) {
+        // Spring-Mass Soft Body Mesh Structure
+        function createSpringJellyBlob(x, y, value) {
             const radius = getRadius(value);
-            const body = Bodies.circle(x, y, radius, {
-                restitution: 0.15,
-                friction: 0.5,
-                frictionAir: 0.005,
-                density: 0.0015
+            const numNodes = 14;
+            const nodes = [];
+            const constraints = [];
+
+            const center = Bodies.circle(x, y, radius * 0.35, {
+                density: 0.002 * Math.pow(value, 0.3),
+                friction: 0.3,
+                restitution: 0.1
             });
+            center.isCenter = true;
+            center.value = value;
 
-            body.value = value;
-            body.radius = radius;
-            body.mergeCooldown = 0;
-
-            const pointCount = 28;
-            body.nodes = [];
-            for (let i = 0; i < pointCount; i++) {
-                body.nodes.push({
-                    angle: (i / pointCount) * Math.PI * 2,
-                    offset: 0,
-                    velocity: 0
+            for (let i = 0; i < numNodes; i++) {
+                const angle = (i / numNodes) * Math.PI * 2;
+                const nx = x + Math.cos(angle) * radius;
+                const ny = y + Math.sin(angle) * radius;
+                const node = Bodies.circle(nx, ny, radius * 0.18, {
+                    density: 0.001,
+                    friction: 0.4,
+                    restitution: 0.05
                 });
+                node.value = value;
+                nodes.push(node);
+
+                // Radial Springs to Center Core
+                constraints.push(Constraint.create({
+                    bodyA: center,
+                    bodyB: node,
+                    stiffness: 0.12,
+                    damping: 0.05,
+                    length: radius * 0.75
+                }));
             }
 
-            body.popScale = 1.2;
-            blobs.push(body);
-            World.add(engine.world, body);
-            return body;
+            // Outer Perimeter Ring Springs
+            for (let i = 0; i < numNodes; i++) {
+                const nextNode = nodes[(i + 1) % numNodes];
+                constraints.push(Constraint.create({
+                    bodyA: nodes[i],
+                    bodyB: nextNode,
+                    stiffness: 0.3,
+                    damping: 0.08,
+                    length: (2 * Math.PI * radius) / numNodes
+                }));
+            }
+
+            const blobObj = { center, nodes, constraints, value, radius };
+            blobs.push(blobObj);
+            World.add(engine.world, [center, ...nodes, ...constraints]);
+            return blobObj;
         }
 
-        // Inter-blob soft contacts and merging physics
-        Events.on(engine, 'collisionStart', (evt) => {
-            evt.pairs.forEach(({ bodyA, bodyB }) => {
-                const bA = bodyA.value ? bodyA : null;
-                const bB = bodyB.value ? bodyB : null;
+        let queue = [1, 2, 4, 8, 16];
 
-                // Gentle non-explody merge
-                if (bA && bB && bA.value === bB.value && bA.mergeCooldown === 0 && bB.mergeCooldown === 0) {
-                    const nextVal = bA.value * 2;
-                    const midX = (bA.position.x + bB.position.x) / 2;
-                    const midY = (bA.position.y + bB.position.y) / 2;
-
-                    World.remove(engine.world, bB);
-                    blobs = blobs.filter(b => b !== bB);
-
-                    bA.value = nextVal;
-                    bA.radius = getRadius(nextVal);
-                    bA.mergeCooldown = 12;
-                    bA.popScale = 1.35; // Gentle scale bounce
-                    Body.setPosition(bA, { x: midX, y: midY });
-
-                    score += nextVal;
-                    document.getElementById('scoreDisplay').textContent = score;
-
-                    floatTexts.push({
-                        x: midX, y: midY,
-                        text: `+${nextVal}`,
-                        color: COLORS[nextVal] || '#fff',
-                        alpha: 1.0
-                    });
-                }
-            });
-        });
-
-        // Direct Aiming Controls (Drag Down = Arrow Points Down = Shoot Down)
+        // Direct Aim Controls (Pull Down -> Shoot Down)
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
         let dragCurrent = { x: 0, y: 0 };
@@ -360,303 +287,69 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         };
 
-        const onPointerDown = (e) => {
-            if (gameOver) return;
+        canvas.addEventListener('mousedown', (e) => {
             isDragging = true;
             dragStart = getTouchPos(e);
             dragCurrent = { ...dragStart };
-        };
+        });
 
-        const onPointerMove = (e) => {
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) dragCurrent = getTouchPos(e);
+        });
+
+        window.addEventListener('mouseup', () => {
             if (!isDragging) return;
-            dragCurrent = getTouchPos(e);
-        };
-
-        const onPointerUp = () => {
-            if (!isDragging || gameOver) return;
             isDragging = false;
 
-            // Direct vector: Pulling down launches down
             const dx = dragCurrent.x - dragStart.x;
             const dy = dragCurrent.y - dragStart.y;
             const dist = Math.hypot(dx, dy);
 
-            const activeVal = queue.shift();
-            queue.push(generateNextTile());
+            const val = queue.shift();
+            queue.push(1);
 
-            const spawnX = width * 0.42;
-            const spawnY = height * 0.08;
-            const blob = createDeformableBlob(spawnX, spawnY, activeVal);
-
+            const blob = createSpringJellyBlob(width / 2, height * 0.12, val);
             if (dist > 10) {
-                const angle = Math.atan2(Math.max(10, dy), dx);
-                const power = Math.min(dist * 0.12, 20);
-                Body.setVelocity(blob, {
-                    x: Math.cos(angle) * power,
-                    y: Math.sin(angle) * power
+                const angle = Math.atan2(dy, dx);
+                const speed = Math.min(dist * 0.12, 18);
+                Body.setVelocity(blob.center, {
+                    x: Math.cos(angle) * speed,
+                    y: Math.sin(angle) * speed
                 });
-            } else {
-                Body.setVelocity(blob, { x: 0, y: 4 });
             }
-        };
-
-        canvas.addEventListener('mousedown', onPointerDown);
-        canvas.addEventListener('mousemove', onPointerMove);
-        window.addEventListener('mouseup', onPointerUp);
-
-        canvas.addEventListener('touchstart', onPointerDown, { passive: true });
-        canvas.addEventListener('touchmove', onPointerMove, { passive: true });
-        window.addEventListener('touchend', onPointerUp);
-
-        let overflowTime = 0;
-        function checkOverflow() {
-            const dangerY = height * 0.18;
-            const overflowing = blobs.some(b => b.position.y < dangerY && Math.abs(b.velocity.y) < 0.2);
-
-            if (overflowing) {
-                overflowTime += 1/60;
-                if (overflowTime > 2.0 && !gameOver) {
-                    gameOver = true;
-                    document.getElementById('finalScore').textContent = score;
-                    document.getElementById('gameOverModal').classList.add('show');
-                }
-            } else {
-                overflowTime = Math.max(0, overflowTime - 1/60);
-            }
-        }
-
-        function restartGame() {
-            blobs.forEach(b => World.remove(engine.world, b));
-            blobs = [];
-            score = 0;
-            gameOver = false;
-            overflowTime = 0;
-            document.getElementById('scoreDisplay').textContent = 0;
-            document.getElementById('gameOverModal').classList.remove('show');
-        }
-
-        // Realistic Squishy Mesh Deformation Solver
-        function applySquishyInteractions() {
-            for (let i = 0; i < blobs.length; i++) {
-                const bA = blobs[i];
-                
-                for (let j = i + 1; j < blobs.length; j++) {
-                    const bB = blobs[j];
-                    const dx = bB.position.x - bA.position.x;
-                    const dy = bB.position.y - bA.position.y;
-                    const dist = Math.hypot(dx, dy);
-                    const minDist = bA.radius + bB.radius;
-
-                    if (dist < minDist && dist > 0.001) {
-                        const overlap = minDist - dist;
-                        const contactAngleA = Math.atan2(dy, dx) - bA.angle;
-                        const contactAngleB = Math.atan2(-dy, -dx) - bB.angle;
-
-                        // Flatten vertices at contact points into tight squishy gaps
-                        bA.nodes.forEach(node => {
-                            let diff = node.angle - contactAngleA;
-                            while (diff < -Math.PI) diff += Math.PI * 2;
-                            while (diff > Math.PI) diff -= Math.PI * 2;
-                            if (Math.abs(diff) < Math.PI / 3) {
-                                node.offset -= Math.cos(diff) * overlap * 0.18;
-                            }
-                        });
-
-                        bB.nodes.forEach(node => {
-                            let diff = node.angle - contactAngleB;
-                            while (diff < -Math.PI) diff += Math.PI * 2;
-                            while (diff > Math.PI) diff -= Math.PI * 2;
-                            if (Math.abs(diff) < Math.PI / 3) {
-                                node.offset -= Math.cos(diff) * overlap * 0.18;
-                            }
-                        });
-                    }
-                }
-
-                // Wall compression
-                if (bA.position.x - bA.radius < 12) {
-                    const comp = 12 - (bA.position.x - bA.radius);
-                    bA.nodes.forEach(node => {
-                        const globalAngle = node.angle + bA.angle;
-                        if (Math.abs(Math.cos(globalAngle) + 1) < 0.6) {
-                            node.offset -= comp * 0.2;
-                        }
-                    });
-                }
-                if (bA.position.x + bA.radius > width - 12) {
-                    const comp = (bA.position.x + bA.radius) - (width - 12);
-                    bA.nodes.forEach(node => {
-                        const globalAngle = node.angle + bA.angle;
-                        if (Math.abs(Math.cos(globalAngle) - 1) < 0.6) {
-                            node.offset -= comp * 0.2;
-                        }
-                    });
-                }
-                if (bA.position.y + bA.radius > height - 12) {
-                    const comp = (bA.position.y + bA.radius) - (height - 12);
-                    bA.nodes.forEach(node => {
-                        const globalAngle = node.angle + bA.angle;
-                        if (Math.abs(Math.sin(globalAngle) - 1) < 0.6) {
-                            node.offset -= comp * 0.2;
-                        }
-                    });
-                }
-            }
-        }
+        });
 
         function draw() {
             ctx.clearRect(0, 0, width, height);
 
-            // 1. Top Dispenser Queue matching reference layout
-            const queueY = height * 0.09;
-            const activeX = width * 0.38;
-            const spacing = width * 0.13;
-
-            const activeVal = queue[0];
-            const activeRad = getRadius(activeVal);
-            
-            ctx.fillStyle = COLORS[activeVal] || '#fff';
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = Math.max(2, width * 0.008);
-
-            ctx.beginPath();
-            ctx.roundRect(activeX - activeRad - 8, queueY - activeRad - 4, activeRad * 2 + 16, activeRad * 2 + 8, activeRad + 4);
-            ctx.stroke();
-            ctx.fill();
-
-            ctx.fillStyle = '#000';
-            ctx.font = `900 ${activeRad * 0.85}px 'Chakra Petch', sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(activeVal, activeX, queueY);
-
-            for (let i = 1; i <= 3; i++) {
-                const val = queue[i];
-                const qRad = getRadius(val) * 0.65;
-                const qX = activeX + activeRad + 16 + (i - 1) * spacing;
-                
-                ctx.fillStyle = COLORS[val] || '#fff';
-                ctx.beginPath();
-                ctx.roundRect(qX - qRad, queueY - qRad, qRad * 2, qRad * 2, Math.max(4, qRad * 0.35));
-                ctx.fill();
-
-                ctx.fillStyle = '#000';
-                ctx.font = `900 ${qRad * 0.85}px 'Chakra Petch', sans-serif`;
-                ctx.fillText(val, qX, queueY);
-            }
-
-            // 2. Direct Aim Arrow (Points Down when pulling down)
-            if (isDragging) {
-                const dx = dragCurrent.x - dragStart.x;
-                const dy = Math.max(10, dragCurrent.y - dragStart.y);
-                const dist = Math.hypot(dx, dy);
-
-                if (dist > 10) {
-                    const angle = Math.atan2(dy, dx);
-                    const arrowLen = Math.min(dist * 0.85, 120);
-                    const startX = activeX;
-                    const startY = queueY + activeRad + 10;
-                    const endX = startX + Math.cos(angle) * arrowLen;
-                    const endY = startY + Math.sin(angle) * arrowLen;
-
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 4.5;
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
-
-                    const headLen = 14;
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.moveTo(endX, endY);
-                    ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI / 6), endY - headLen * Math.sin(angle - Math.PI / 6));
-                    ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI / 6), endY - headLen * Math.sin(angle + Math.PI / 6));
-                    ctx.closePath();
-                    ctx.fill();
-                }
-            }
-
-            // 3. Solve Squishy Jelly Compression
-            applySquishyInteractions();
-
-            // 4. Render Squishy Blobs
+            // Render Springs and Soft Body Outlines
             blobs.forEach(b => {
-                if (b.mergeCooldown > 0) b.mergeCooldown--;
-                if (b.popScale > 1.0) b.popScale += (1.0 - b.popScale) * 0.12;
-
-                const r = b.radius * b.popScale;
-                ctx.save();
-                ctx.translate(b.position.x, b.position.y);
-                ctx.rotate(b.angle);
-
-                const nodeCount = b.nodes.length;
-                const points = [];
-
-                for (let i = 0; i < nodeCount; i++) {
-                    const node = b.nodes[i];
-                    
-                    // Soft spring recovery
-                    const spring = -node.offset * 0.06;
-                    const damping = -node.velocity * 0.08;
-                    node.velocity += spring + damping;
-                    node.offset += node.velocity;
-                    node.offset = Math.max(-r * 0.5, Math.min(r * 0.35, node.offset));
-
-                    const curR = r + node.offset;
-                    points.push({
-                        x: Math.cos(node.angle) * curR,
-                        y: Math.sin(node.angle) * curR
-                    });
-                }
-
-                // Smooth organic hull
                 ctx.beginPath();
-                const lastPt = points[nodeCount - 1];
-                const firstPt = points[0];
-                ctx.moveTo((lastPt.x + firstPt.x) / 2, (lastPt.y + firstPt.y) / 2);
+                const pts = b.nodes.map(n => n.position);
+                ctx.moveTo((pts[0].x + pts[pts.length - 1].x) / 2, (pts[0].y + pts[pts.length - 1].y) / 2);
 
-                for (let i = 0; i < nodeCount; i++) {
-                    const nextIdx = (i + 1) % nodeCount;
-                    const midX = (points[i].x + points[nextIdx].x) / 2;
-                    const midY = (points[i].y + points[nextIdx].y) / 2;
-                    ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+                for (let i = 0; i < pts.length; i++) {
+                    const next = pts[(i + 1) % pts.length];
+                    const midX = (pts[i].x + next.x) / 2;
+                    const midY = (pts[i].y + next.y) / 2;
+                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
                 }
                 ctx.closePath();
 
-                // Fill color
-                ctx.fillStyle = COLORS[b.value] || '#ffffff';
+                ctx.fillStyle = COLORS[b.value] || '#fff';
                 ctx.fill();
-
-                // Dark outline
-                ctx.strokeStyle = '#111111';
+                ctx.strokeStyle = '#111';
                 ctx.lineWidth = 3.5;
                 ctx.stroke();
 
-                // Number Label
-                ctx.fillStyle = '#000000';
-                ctx.font = `900 ${r * 0.7}px 'Chakra Petch', sans-serif`;
+                ctx.fillStyle = '#000';
+                ctx.font = `900 ${b.radius * 0.75}px 'Chakra Petch', sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(b.value, 0, 0);
-
-                ctx.restore();
-            });
-
-            // 5. Score Float Text
-            floatTexts = floatTexts.filter(ft => ft.alpha > 0);
-            floatTexts.forEach(ft => {
-                ft.y -= 1.2;
-                ft.alpha -= 0.02;
-                ctx.fillStyle = ft.color;
-                ctx.globalAlpha = Math.max(0, ft.alpha);
-                ctx.font = `900 18px 'Orbitron', sans-serif`;
-                ctx.fillText(ft.text, ft.x, ft.y);
-                ctx.globalAlpha = 1.0;
+                ctx.fillText(b.value, b.center.position.x, b.center.position.y);
             });
 
             Engine.update(engine, 1000 / 60);
-            checkOverflow();
             requestAnimationFrame(draw);
         }
 
