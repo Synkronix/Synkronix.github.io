@@ -2,427 +2,185 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SOBOSUBA - Spring-Mass Jelly Physics</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Princess Day</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-        html, body { width: 100%; height: 100%; background: #0c0c0e; overflow: hidden; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Chakra Petch', sans-serif; }
-
-        .game-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            width: clamp(280px, 92vw, 980px);
-            height: clamp(480px, 92vh, 860px);
-            aspect-ratio: 16 / 9;
-            background: #111113;
-            border-radius: 12px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-            padding: 10px;
+        :root { --pink: #fce4ec; --dark-pink: #f06292; --text: #880e4f; }
+        body { background: var(--pink); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        #overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.5s ease; }
+        .popup { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; animation: fadeIn 0.8s ease-out; }
+        button { background: var(--dark-pink); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; margin: 0.5rem; transition: transform 0.2s, background 0.2s; }
+        button:hover { transform: scale(1.1); background: #ec407a; }
+        #main-content { display: none; width: 90%; max-width: 400px; padding: 2rem 0; text-align: center; animation: slideUp 1s ease-out; }
+        .gallery { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+        .card { background: white; padding: 1rem; border-radius: 0.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .hamster { width: 100%; border-radius: 0.8rem; margin-bottom: 1rem; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .petal { position: fixed; top: -10%; color: #ffc1e3; opacity: 0.6; user-select: none; pointer-events: none; z-index: 0; animation: fall linear infinite; }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); left: calc(var(--left) + 10%); }
         }
-
-        .left-panel {
-            width: 15%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .sobosuba-title {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2vh, 4.5vh, 40px);
-            font-weight: 900;
-            letter-spacing: 2px;
-            color: #2b2b2e;
-            text-transform: lowercase;
-            text-align: center;
-        }
-
-        .tank-wrapper {
-            position: relative;
-            height: 100%;
-            aspect-ratio: 0.82;
-            background: #232326;
-            border-radius: 14px 14px 28px 28px;
-            padding: 8px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-
-        .canvas-container {
-            flex: 1;
-            width: 100%;
-            background: #050505;
-            border-radius: 8px 8px 22px 22px;
-            position: relative;
-            overflow: hidden;
-            clip-path: polygon(
-                0% 0%, 
-                100% 0%, 
-                100% calc(100% - 32px), 
-                calc(100% - 32px) 100%, 
-                32px 100%, 
-                0% calc(100% - 32px)
-            );
-        }
-
-        canvas { display: block; width: 100%; height: 100%; }
-
-        .right-panel {
-            width: 15%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .score-display {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(3vh, 7vh, 60px);
-            font-weight: 900;
-            color: #242427;
-            letter-spacing: 4px;
-        }
-
-        .game-over {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.88);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            color: #fff;
-            gap: 15px;
-        }
-        .game-over.show { display: flex; }
-        .go-title { font-size: 24px; font-weight: 900; color: #ff3b3b; font-family: 'Orbitron'; }
-        .go-score { font-size: 16px; color: #aaa; }
-        .btn-restart {
-            padding: 10px 24px;
-            background: #333;
-            border: none;
-            color: #fff;
-            font-family: 'Orbitron';
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        @media (max-aspect-ratio: 1/1) {
-            .game-wrapper {
-                flex-direction: column;
-                aspect-ratio: auto;
-                width: 100vw;
-                height: 100vh;
-                padding: 4px;
-            }
-            .left-panel, .right-panel {
-                width: 100%;
-                height: 35px;
-            }
-            .sobosuba-title, .score-display {
-                writing-mode: horizontal-tb;
-                transform: none;
-                font-size: 18px;
-            }
-            .tank-wrapper {
-                width: 100%;
-                height: calc(100vh - 80px);
-            }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #cursor-text { position: fixed; pointer-events: none; z-index: 9999; font-weight: bold; color: var(--dark-pink); white-space: nowrap; transition: transform 0.1s ease-out; }
     </style>
 </head>
 <body>
+    <div id="cursor-text">o3o</div>
+    <style>
+        :root { --pink: #fce4ec; --dark-pink: #f06292; --text: #880e4f; }
+        body { background: var(--pink); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        #overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.5s ease; }
+        .popup { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; animation: fadeIn 0.8s ease-out; }
+        button { background: var(--dark-pink); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; margin: 0.5rem; transition: transform 0.2s, background 0.2s; }
+        button:hover { transform: scale(1.1); background: #ec407a; }
+        #main-content { display: none; width: 90%; max-width: 400px; padding: 2rem 0; text-align: center; animation: slideUp 1s ease-out; }
+        .gallery { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+        .card { background: white; padding: 1rem; border-radius: 0.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .hamster { width: 100%; border-radius: 0.8rem; margin-bottom: 1rem; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .petal { position: fixed; top: -10%; color: #ffc1e3; opacity: 0.6; user-select: none; pointer-events: none; z-index: 0; animation: fall linear infinite; }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); left: calc(var(--left) + 10%); }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #cursor-text { position: fixed; pointer-events: none; z-index: 9999; font-weight: bold; font-size: 2em; color: var(--dark-pink); white-space: nowrap; transition: transform 0.1s ease-out; }
+    </style>
+</head>
+<body>
+    <div id="cursor-text">o3o</div>
+    <script>
+        const cursorText = document.getElementById('cursor-text');
+        let currentMode = 'normal'; // normal, shaking, crying, shocked
+        let blinkToggle = true;
+        let lastX = 0, lastY = 0, lastTime = Date.now();
+        let shakeTimer = null;
+        let isHoveringCard = false;
 
-    <div class="game-wrapper">
-        <div class="left-panel">
-            <div class="sobosuba-title">sobosuba</div>
+        function setFace(face) {
+            cursorText.innerText = face;
+        }
+
+        function normalLoop() {
+            if (currentMode !== 'normal') return;
+            blinkToggle = !blinkToggle;
+            setFace(blinkToggle ? 'o3o' : '-3-');
+            setTimeout(normalLoop, blinkToggle ? 3000 : 1000);
+        }
+        normalLoop();
+
+        function triggerCrySequence() {
+            setFace('T3T');
+            setTimeout(() => {
+                setFace('T3o');
+                setTimeout(() => {
+                    currentMode = 'normal';
+                    blinkToggle = true;
+                    setFace('o3o');
+                    normalLoop();
+                }, 300);
+            }, 1500);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const now = Date.now();
+            const dt = now - lastTime;
+            
+            if (dt > 0) {
+                const dist = Math.sqrt((e.clientX - lastX)**2 + (e.clientY - lastY)**2);
+                const speed = dist / dt;
+
+                if (speed > 8.0 && (currentMode === 'normal' || currentMode === 'shaking')) {
+                    currentMode = 'shaking';
+                    setFace('Q3Q');
+                    
+                    clearTimeout(shakeTimer);
+                    shakeTimer = setTimeout(() => {
+                        // Stopped shaking, wait 1s then cry
+                        currentMode = 'crying';
+                        setFace('Q3Q');
+                        setTimeout(triggerCrySequence, 1000);
+                    }, 300);
+                }
+            }
+            lastX = e.clientX; lastY = e.clientY; lastTime = now;
+            cursorText.style.left = (e.clientX + 10) + 'px';
+            cursorText.style.top = (e.clientY + 10) + 'px';
+        });
+
+        // Hover cards event delegation
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.card') || e.target.closest('.hamster')) {
+                if (currentMode === 'normal') {
+                    isHoveringCard = true;
+                    currentMode = 'shocked';
+                    setFace('O3O;');
+                }
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.closest('.card') || e.target.closest('.hamster')) {
+                if (currentMode === 'shocked') {
+                    isHoveringCard = false;
+                    currentMode = 'normal';
+                    blinkToggle = true;
+                    setFace('o3o');
+                    normalLoop();
+                }
+            }
+        });
+
+        function createPetal() {
+            const p = document.createElement('div');
+            p.className = 'petal';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.setProperty('--left', (Math.random() * 20 - 10) + 'vw');
+            p.style.fontSize = (Math.random() * 10 + 15) + 'px';
+            p.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            p.innerText = '🌸';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 7000);
+        }
+        setInterval(createPetal, 300);
+    </script>
+    <div id="overlay">
+        <div class="popup">
+            <h2>Do you know what day is it today?</h2>
+            <button onclick="start('definitely o3O')">Definitely</button>
+            <button onclick="start('not_rlly Q3;')">Not rlly</button>
         </div>
+    </div>
 
-        <div class="tank-wrapper">
-            <div class="canvas-container" id="canvasContainer">
-                <canvas id="gameCanvas"></canvas>
-                <div class="game-over" id="gameOverModal">
-                    <div class="go-title">GAME OVER</div>
-                    <div class="go-score">FINAL SCORE: <span id="finalScore">0</span></div>
-                    <button class="btn-restart" onclick="restartGame()">PLAY AGAIN</button>
-                </div>
+    <div id="main-content">
+        <h1 id="heading"></h1>
+        <img src="https://i.pinimg.com/736x/78/d2/08/78d208338d817894c7e956623139b7ff.jpg" alt="Hamster" class="hamster">
+        <div class="gallery">
+            <div class="card">Hai bb, maybe i epet rn or maybe i am not, we might not know, 
+                but what do i know is, bb is a very special person to me, i cannot wait for the day
+                that i can make bb feel like a true princess u3u 🤍
             </div>
-        </div>
-
-        <div class="right-panel">
-            <div class="score-display" id="scoreDisplay">0</div>
+            <div class="card">I know bb is having a hard time for the last few days
+                everytime i heard bb in pain it hurts me too, i wish i could just be there and take all
+                bb's pain with me T3T
+            </div>
+            <div class="card">I hope bb is doing aight, im sorry that i keep eeping, but i never forget
+                about bb never Q3q, dont forget to take breaks, and NO COFFEE BB NO COFFEE FOR A WHILE Q3Q>,
+                so yeah, i love you bb T3, my princess Ó3🤍
+            </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const container = document.getElementById('canvasContainer');
-
-        let width, height;
-        function resize() {
-            const rect = container.getBoundingClientRect();
-            width = rect.width;
-            height = rect.height;
-            canvas.width = width;
-            canvas.height = height;
+        function start(choice) {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            const head = document.getElementById('heading');
+            head.innerText = choice === 'definitely' 
+                ? "Aint't no way bb know, but it's Princess Day today \O3O/🤍" 
+                : "IS PRINCESS DAY O3/, for my princess bb U3u🤍";
         }
-        resize();
-        window.addEventListener('resize', resize);
-
-        const { Engine, World, Bodies, Body, Constraint, Events } = Matter;
-        const engine = Engine.create({ enableSleeping: false });
-        engine.world.gravity.y = 1.3;
-
-        let score = 0;
-        let gameOver = false;
-        let blobs = [];
-        let dropX = width / 2;
-
-        const COLORS = {
-            1: '#eb2d30', 2: '#f6d928', 4: '#7af230', 8: '#3bf1d2',
-            16: '#3c3bf8', 32: '#973af3', 64: '#f33d9c', 128: '#ff6923',
-            256: '#d8fc30', 512: '#f3d12a', 1024: '#30e5f2', 2048: '#e62ff1'
-        };
-
-        function getRadius(val) {
-            const base = width * 0.085 * 1.15;
-            const mult = Math.log2(val);
-            return base + mult * (width * 0.018 * 1.15);
-        }
-
-        const wallOpts = { isStatic: true, friction: 0.3, restitution: 0.1 };
-        const wallThick = 60;
-
-        const leftWall = Bodies.rectangle(-wallThick/2, height/2, wallThick, height * 2, wallOpts);
-        const rightWall = Bodies.rectangle(width + wallThick/2, height/2, wallThick, height * 2, wallOpts);
-        const bottomWall = Bodies.rectangle(width/2, height + wallThick/2, width * 2, wallThick, wallOpts);
-
-        World.add(engine.world, [leftWall, rightWall, bottomWall]);
-
-        function createSpringJellyBlob(x, y, value) {
-            const radius = getRadius(value);
-            const numNodes = 14;
-            const nodes = [];
-            const constraints = [];
-
-            const center = Bodies.circle(x, y, radius * 0.35, {
-                density: 0.002 * Math.pow(value, 0.3),
-                friction: 0.3,
-                restitution: 0.1
-            });
-            center.isCenter = true;
-            center.value = value;
-
-            for (let i = 0; i < numNodes; i++) {
-                const angle = (i / numNodes) * Math.PI * 2;
-                const nx = x + Math.cos(angle) * radius;
-                const ny = y + Math.sin(angle) * radius;
-                const node = Bodies.circle(nx, ny, radius * 0.18, {
-                    density: 0.001,
-                    friction: 0.4,
-                    restitution: 0.05
-                });
-                node.value = value;
-                nodes.push(node);
-
-                constraints.push(Constraint.create({
-                    bodyA: center,
-                    bodyB: node,
-                    stiffness: 0.12,
-                    damping: 0.05,
-                    length: radius * 0.75
-                }));
-            }
-
-            for (let i = 0; i < numNodes; i++) {
-                const nextNode = nodes[(i + 1) % numNodes];
-                constraints.push(Constraint.create({
-                    bodyA: nodes[i],
-                    bodyB: nextNode,
-                    stiffness: 0.3,
-                    damping: 0.08,
-                    length: (2 * Math.PI * radius) / numNodes
-                }));
-            }
-
-            const blobObj = { center, nodes, constraints, value, radius };
-            blobs.push(blobObj);
-            World.add(engine.world, [center, ...nodes, ...constraints]);
-            return blobObj;
-        }
-
-        let queue = [1, 2, 4, 8, 16];
-
-        let isDragging = false;
-        let dragStart = { x: 0, y: 0 };
-        let dragCurrent = { x: 0, y: 0 };
-
-        const getTouchPos = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        };
-
-        canvas.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            dragStart = getTouchPos(e);
-            dragCurrent = { ...dragStart };
-            dropX = Math.max(50, Math.min(width - 50, dragStart.x));
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            const pos = getTouchPos(e);
-            dropX = Math.max(50, Math.min(width - 50, pos.x));
-            if (isDragging) dragCurrent = pos;
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-
-            const dx = dragCurrent.x - dragStart.x;
-            const dy = dragCurrent.y - dragStart.y;
-            const dist = Math.hypot(dx, dy);
-
-            const val = queue.shift();
-            queue.push(1);
-
-            const blob = createSpringJellyBlob(dropX, height * 0.12, val);
-            if (dist > 10) {
-                const angle = Math.atan2(dy, dx);
-                const speed = Math.min(dist * 0.12, 18);
-                Body.setVelocity(blob.center, {
-                    x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
-                });
-            }
-        });
-
-        // Collision handling for merging blobs with the same value
-        Events.on(engine, 'collisionStart', (event) => {
-            const pairs = event.pairs;
-            pairs.forEach(pair => {
-                const bodyA = pair.bodyA;
-                const bodyB = pair.bodyB;
-
-                if (bodyA.isCenter && bodyB.isCenter && bodyA.value === bodyB.value) {
-                    const blobA = blobs.find(b => b.center === bodyA);
-                    const blobB = blobs.find(b => b.center === bodyB);
-
-                    if (blobA && blobB && !blobA.merged && !blobB.merged) {
-                        blobA.merged = true;
-                        blobB.merged = true;
-
-                        const newVal = blobA.value * 2;
-                        score += newVal;
-                        document.getElementById('scoreDisplay').innerText = score;
-
-                        const midX = (bodyA.position.x + bodyB.position.x) / 2;
-                        const midY = (bodyA.position.y + bodyB.position.y) / 2;
-
-                        // Remove old blobs from world and array
-                        [blobA, blobB].forEach(b => {
-                            World.remove(engine.world, b.center);
-                            b.nodes.forEach(n => World.remove(engine.world, n));
-                            b.constraints.forEach(c => World.remove(engine.world, c));
-                        });
-                        blobs = blobs.filter(b => b !== blobA && b !== blobB);
-
-                        // Spawn upgraded blob
-                        createSpringJellyBlob(midX, midY, newVal);
-                    }
-                }
-            });
-        });
-
-        function restartGame() {
-            score = 0;
-            document.getElementById('scoreDisplay').innerText = score;
-            document.getElementById('gameOverModal').classList.remove('show');
-            blobs.forEach(b => {
-                World.remove(engine.world, b.center);
-                b.nodes.forEach(n => World.remove(engine.world, n));
-                b.constraints.forEach(c => World.remove(engine.world, c));
-            });
-            blobs = [];
-            queue = [1, 2, 4, 8, 16];
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
-
-            // Draw Preview Ball at Top
-            if (queue.length > 0) {
-                const previewVal = queue[0];
-                const previewRadius = getRadius(previewVal) * 0.6;
-                ctx.beginPath();
-                ctx.arc(dropX, height * 0.08, previewRadius, 0, Math.PI * 2);
-                ctx.fillStyle = COLORS[previewVal] || '#fff';
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#fff';
-                ctx.stroke();
-
-                ctx.fillStyle = '#000';
-                ctx.font = `900 ${previewRadius}px 'Chakra Petch', sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(previewVal, dropX, height * 0.08);
-            }
-
-            // Render Springs and Soft Body Outlines
-            blobs.forEach(b => {
-                ctx.beginPath();
-                const pts = b.nodes.map(n => n.position);
-                ctx.moveTo((pts[0].x + pts[pts.length - 1].x) / 2, (pts[0].y + pts[pts.length - 1].y) / 2);
-
-                for (let i = 0; i < pts.length; i++) {
-                    const next = pts[(i + 1) % pts.length];
-                    const midX = (pts[i].x + next.x) / 2;
-                    const midY = (pts[i].y + next.y) / 2;
-                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
-                }
-                ctx.closePath();
-
-                ctx.fillStyle = COLORS[b.value] || '#fff';
-                ctx.fill();
-                ctx.strokeStyle = '#111';
-                ctx.lineWidth = 3.5;
-                ctx.stroke();
-
-                ctx.fillStyle = '#000';
-                ctx.font = `900 ${b.radius * 0.75}px 'Chakra Petch', sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(b.value, b.center.position.x, b.center.position.y);
-            });
-
-            Engine.update(engine, 1000 / 60);
-            requestAnimationFrame(draw);
-        }
-
-        draw();
     </script>
 </body>
 </html>
